@@ -1,0 +1,99 @@
+#include <iostream>
+using namespace std;
+
+#define MAX_FLOORS 5
+#define MAX_PEOPLE 10
+
+// Queue implementation using arrays
+struct Queue {
+    int arr[MAX_PEOPLE];
+    int front, rear;
+
+    Queue() {
+        front = 0;
+        rear = -1;
+    }
+
+    void enqueue(int x) {
+        if (rear==MAX_PEOPLE-1) {
+            cout << "Queue full! Cannot add person.\n";
+        } else {
+            arr[++rear] = x;
+        }
+    }
+
+    int dequeue() {
+        if (front>rear) {
+            return -1;
+        } else {
+            return arr[front++]; // indicates empty
+        }
+    }
+
+    int size() {
+        if(front>rear){
+            return 0;
+        }
+        else{
+            return rear-front+1;
+        }
+    }
+};
+
+// Elevator system
+class Elevator {
+    int currentFloor;
+    int direction; // +1 = up, -1 = down
+    Queue inside;  // passengers inside elevator
+
+public:
+    Elevator() {
+        currentFloor = 0;
+        direction = 1;
+    }
+
+    void move(Queue waiting[MAX_FLOORS]) {
+        cout << "\nElevator at floor " << currentFloor << endl;
+
+        // Drop off people
+        int sz = inside.size();
+        for (int i = 0; i < sz; i++) {
+            int dest = inside.dequeue();
+            if (dest == currentFloor) {
+                cout << "Person got off at floor " << currentFloor << endl;
+            } else {
+                inside.enqueue(dest); // still inside
+            }
+        }
+
+        // Pick up waiting people
+        int wsize = waiting[currentFloor].size();
+        for (int i = 0; i < wsize; i++) {
+            int dest = waiting[currentFloor].dequeue();
+            inside.enqueue(dest);
+            cout << "Picked person going to floor " << dest << endl;
+        }
+
+        // Move elevator
+        currentFloor += direction;
+        if (currentFloor == MAX_FLOORS - 1) direction = -1; // reverse at top
+        else if (currentFloor == 0) direction = 1;          // reverse at bottom
+    }
+};
+
+int main() {
+    Queue waiting[MAX_FLOORS]; // queues for each floor
+
+    waiting[0].enqueue(3); 
+    waiting[2].enqueue(4); 
+    waiting[4].enqueue(1); 
+    waiting[4].enqueue(0);
+    
+    Elevator e;
+
+    for (int i = 0; i < 12; i++) {
+        e.move(waiting);
+    }
+
+    return 0;
+}
